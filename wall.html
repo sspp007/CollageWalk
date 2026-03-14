@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Memory Wall — Campus Walk</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&family=Caveat:wght@600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cream:       #fdf6ec;
+      --warm:        #f5e6c8;
+      --amber:       #e8a030;
+      --rust:        #c45e2a;
+      --dark:        #1a1208;
+      --mid:         #5c3d1e;
+      --light-text:  #9e7a52;
+      --pin-red:     #c0392b;
+      --paper:       #fffef8;
+      --card-shadow: 0 8px 32px rgba(30,15,0,0.18);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--dark);
+      overflow-x: hidden;
+      background-color: #f0e4cc;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232,160,48,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 90% 90%, rgba(196,94,42,0.10) 0%, transparent 60%),
+        repeating-linear-gradient(94deg, transparent, transparent 3px, rgba(180,130,60,0.04) 3px, rgba(180,130,60,0.04) 4px),
+        repeating-linear-gradient(182deg, transparent, transparent 5px, rgba(0,0,0,0.025) 5px, rgba(0,0,0,0.025) 6px);
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(26,18,8,0.82);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 6%;
+      border-bottom: 1px solid rgba(232,160,48,0.2);
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      color: rgba(255,255,255,0.65);
+      font-size: 0.88rem;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: var(--amber); }
+    .back-btn svg { width: 15px; height: 15px; }
+
+    .topbar-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: white;
+      letter-spacing: 0.04em;
+    }
+    .topbar-logo span { font-style: italic; color: var(--amber); }
+
+    .topbar-count {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── PAGE INTRO ── */
+    .page-intro {
+      text-align: center;
+      padding: 3rem 6% 1.5rem;
+    }
+
+    .page-intro h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .page-intro p {
+      font-family: 'Caveat', cursive;
+      font-size: 1.15rem;
+      color: var(--light-text);
+    }
+
+    .divider {
+      width: 50px;
+      height: 3px;
+      background: var(--amber);
+      margin: 0 auto 1.8rem;
+      border-radius: 2px;
+    }
+
+    /* ── FILTERS ── */
+    .filters {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      padding: 0 4% 2.5rem;
+    }
+
+    .filter-btn {
+      padding: 0.45rem 1.2rem;
+      background: transparent;
+      border: 1.5px solid var(--warm);
+      border-radius: 100px;
+      color: var(--mid);
+      font-size: 0.85rem;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: var(--dark);
+      font-weight: 500;
+    }
+
+    /* ── POLAROID GRID ── */
+    .grid {
+      padding: 0.5rem 3.5% 5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* ── POLAROID ── */
+    .polaroid {
+      width: 155px;
+      flex-shrink: 0;
+      background: var(--paper);
+      padding: 8px 8px 36px;
+      box-shadow: var(--card-shadow);
+      border-radius: 3px;
+      margin: 10px 8px;
+      transform: rotate(var(--r));
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+      animation: dropIn 0.5s ease both;
+      animation-delay: var(--delay);
+    }
+
+    .polaroid:hover {
+      transform: rotate(0deg) scale(1.15) translateY(-4px);
+      box-shadow: 0 20px 50px rgba(30,15,0,0.22);
+      z-index: 20;
+    }
+
+    /* ── PUSHPIN ── */
+    .pin {
+      position: absolute;
+      top: -9px; left: 50%;
+      transform: translateX(-50%);
+      width: 15px; height: 15px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #e85555, var(--pin-red));
+      box-shadow: 0 2px 5px rgba(60,20,10,0.4);
+      z-index: 2;
+    }
+    .pin::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.55);
+    }
+
+    /* ── PHOTO ── */
+    .photo {
+      width: 100%;
+      aspect-ratio: 1/1;
+      overflow: hidden;
+      position: relative;
+      background: var(--warm);
+    }
+    .photo img { width:100%; height:100%; object-fit:cover; display:block; transition: transform 0.4s; }
+    .polaroid:hover .photo img { transform: scale(1.06); }
+
+    .photo.c1  { background: linear-gradient(135deg,#f6c97a,#e07b3a); }
+    .photo.c2  { background: linear-gradient(135deg,#fde8c0,#d4905a); }
+    .photo.c3  { background: linear-gradient(135deg,#f7a560,#c04020); }
+    .photo.c4  { background: linear-gradient(135deg,#ffe0a0,#e8903a); }
+    .photo.c5  { background: linear-gradient(135deg,#fcd090,#b85828); }
+    .photo.c6  { background: linear-gradient(135deg,#f5e8b8,#c87838); }
+    .photo.c7  { background: linear-gradient(135deg,#f8c090,#d06030); }
+    .photo.c8  { background: linear-gradient(135deg,#fbe0b0,#a84820); }
+    .photo.c9  { background: linear-gradient(135deg,#f9d080,#c07028); }
+    .photo.c10 { background: linear-gradient(135deg,#fce8c8,#d88040); }
+    .photo.c11 { background: linear-gradient(135deg,#f0d8a0,#c08010); }
+    .photo.c12 { background: linear-gradient(135deg,#f9c86a,#e07040); }
+    .photo.c13 { background: linear-gradient(135deg,#f8c8b0,#d04830); }
+    .photo.c14 { background: linear-gradient(135deg,#fde0b8,#c86820); }
+    .photo.c15 { background: linear-gradient(135deg,#f5d5a0,#c07830); }
+    .photo.c16 { background: linear-gradient(135deg,#fcd8a0,#b86820); }
+
+    .photo-emoji {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      font-size: 2rem;
+      opacity: 0.35;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .polaroid:hover .photo-emoji { opacity: 0; }
+
+    /* ── NAME REVEAL ── */
+    .name-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(26,12,0,0.75) 0%, transparent 60%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .polaroid:hover .name-overlay { opacity: 1; }
+
+    .overlay-name {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: white;
+      line-height: 1.2;
+    }
+    .overlay-sem {
+      font-size: 0.58rem;
+      color: var(--amber);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    /* ── CAPTION ── */
+    .caption {
+      text-align: center;
+      margin-top: 3px;
+      padding: 0 3px;
+      font-family: 'Caveat', cursive;
+      font-size: 0.95rem;
+      color: var(--mid);
+      line-height: 1.3;
+      min-height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── SEM BADGE ── */
+    .sem-badge {
+      position: absolute;
+      top: 0.55rem; left: 0.55rem;
+      background: var(--amber);
+      color: var(--dark);
+      font-size: 0.54rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.45rem;
+      border-radius: 2px;
+      z-index: 2;
+    }
+
+    /* ── EMPTY ── */
+    .empty {
+      width: 100%;
+      text-align: center;
+      padding: 5rem 2rem;
+      color: var(--light-text);
+      font-family: 'Caveat', cursive;
+      font-size: 1.5rem;
+    }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      position: fixed; inset: 0;
+      background: rgba(10,5,0,0.85);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .lightbox.open { display: flex; }
+
+    .lb-card {
+      background: var(--paper);
+      padding: 14px 14px 52px;
+      max-width: 340px; width: 88%;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+      border-radius: 3px;
+      transform: rotate(-1.5deg);
+      animation: lbPop 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+      position: relative;
+    }
+    .lb-photo { width:100%; aspect-ratio:1/1; position:relative; overflow:hidden; }
+    .lb-pin {
+      position: absolute; top:-13px; left:50%; transform:translateX(-50%);
+      width:20px; height:20px; border-radius:50%;
+      background: radial-gradient(circle at 35% 35%, #e85555, var(--pin-red));
+      box-shadow: 0 3px 8px rgba(60,20,10,0.4); z-index:2;
+    }
+    .lb-pin::after { content:''; position:absolute; top:4px; left:4px; width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.55); }
+    .lb-name { position:absolute; bottom:18px; left:0; right:0; text-align:center; font-family:'DM Sans',sans-serif; font-size:0.95rem; font-weight:500; color:var(--dark); }
+    .lb-caption { position:absolute; bottom:4px; left:0; right:0; text-align:center; font-family:'Caveat',cursive; font-size:1rem; color:var(--light-text); }
+    .lb-close { position:fixed; top:1.8rem; right:2rem; font-size:2rem; color:rgba(255,255,255,0.7); cursor:pointer; transition:color 0.2s; z-index:201; line-height:1; }
+    .lb-close:hover { color:var(--amber); }
+
+    /* ── SCROLL TOP ── */
+    .scroll-top {
+      position:fixed; bottom:2rem; right:2rem;
+      width:42px; height:42px;
+      background:var(--amber); border:none; border-radius:50%;
+      color:var(--dark); font-size:1.1rem; cursor:pointer;
+      box-shadow:var(--card-shadow);
+      display:flex; align-items:center; justify-content:center;
+      transition:transform 0.2s, opacity 0.3s;
+      opacity:0; pointer-events:none; z-index:100;
+    }
+    .scroll-top.visible { opacity:1; pointer-events:all; }
+    .scroll-top:hover { transform:translateY(-3px); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes dropIn {
+      from { opacity:0; transform:rotate(var(--r)) translateY(-16px) scale(0.92); }
+      to   { opacity:1; transform:rotate(var(--r)) translateY(0) scale(1); }
+    }
+    @keyframes lbPop {
+      from { opacity:0; transform:rotate(-1.5deg) scale(0.82); }
+      to   { opacity:1; transform:rotate(-1.5deg) scale(1); }
+    }
+
+    @media (max-width:600px) {
+      .polaroid { width:120px; margin:7px 5px; }
+      .grid { padding:0.5rem 1rem 4rem; }
+      .topbar { padding:0.8rem 1.2rem; }
+    }
+  
+    /* ── DELETE BUTTON ── */
+    .card-delete {
+      display: none;
+      position: absolute;
+      top: 0.45rem; right: 0.45rem;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: rgba(196,94,42,0.9);
+      border: none; color: white;
+      font-size: 0.7rem; cursor: pointer;
+      align-items: center; justify-content: center;
+      z-index: 10;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .card-delete:hover { background: #a84820; transform: scale(1.15); }
+    .polaroid.is-mine .card-delete { display: flex; }
+    .polaroid.is-mine { outline: 2px solid rgba(232,160,48,0.5); outline-offset: 3px; border-radius: 3px; }
+
+    /* user chip in topbar */
+    .user-chip {
+      display: none; align-items: center; gap: 0.5rem;
+      background: rgba(255,255,255,0.1); border-radius: 100px;
+      padding: 0.25rem 0.7rem 0.25rem 0.25rem;
+    }
+    .user-chip.visible { display: flex; }
+    .user-avatar-ph {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--amber); display: flex; align-items: center;
+      justify-content: center; font-size: 0.75rem; font-weight: 600; color: var(--dark);
+    }
+    .user-name-s {
+      font-size: 0.8rem; color: white; font-weight: 500;
+      max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .signout-btn {
+      background: transparent; border: 1px solid rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.7); font-size: 0.7rem;
+      font-family: 'DM Sans',sans-serif; padding: 0.18rem 0.5rem;
+      border-radius: 4px; cursor: pointer; transition: all 0.2s;
+    }
+    .signout-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <a href="index.html" class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      Back
+    </a>
+    <div class="topbar-logo">Campus <span>Walk</span></div>
+    <div id="userChip" class="user-chip">
+      <div class="user-avatar-ph" id="userAvatarPh"></div>
+      <span class="user-name-s" id="userNameS"></span>
+      <button class="signout-btn" id="signOutBtn">Sign out</button>
+    </div>
+    <span class="topbar-count" id="countLabel"></span>
+  </div>
+
+  <!-- INTRO -->
+  <div class="page-intro">
+    <div class="divider"></div>
+    <h2>The College Wall 📌</h2>
+    <p>Every face, every semester — pinned forever.</p>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <button class="filter-btn active" onclick="filter(this,'all')">All</button>
+    <button class="filter-btn" onclick="filter(this,'sem1')">Sem 1</button>
+    <button class="filter-btn" onclick="filter(this,'sem2')">Sem 2</button>
+    <button class="filter-btn" onclick="filter(this,'sem3')">Sem 3</button>
+    <button class="filter-btn" onclick="filter(this,'sem4')">Sem 4</button>
+    <button class="filter-btn" onclick="filter(this,'sem5')">Sem 5</button>
+    <button class="filter-btn" onclick="filter(this,'sem6')">Sem 6</button>
+  </div>
+
+  <!-- GRID -->
+  <div class="grid" id="grid"></div>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" onclick="closeLb()">
+    <span class="lb-close" onclick="closeLb()">✕</span>
+    <div class="lb-card" onclick="event.stopPropagation()">
+      <div class="lb-pin"></div>
+      <div class="lb-photo"   id="lbPhoto"></div>
+      <div class="lb-name"    id="lbName"></div>
+      <div class="lb-caption" id="lbCaption"></div>
+    </div>
+  </div>
+
+  <!-- SCROLL TOP -->
+  <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, deleteDoc, doc, orderBy, query }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyB4hobxI952cuW2KBeBgYyDXp15muEu2-Y",
+    authDomain:        "campus-walk-e102a.firebaseapp.com",
+    projectId:         "campus-walk-e102a",
+    storageBucket:     "campus-walk-e102a.firebasestorage.app",
+    messagingSenderId: "1067906664886",
+    appId:             "1:1067906664886:web:232a8768953b25bd359917"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const db   = getFirestore(app);
+  const auth = getAuth(app);
+
+  const rots   = [-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3];
+  const colors = ['c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15','c16'];
+  const emojis = ['📸','🎉','😄','🤝','🎓','💡','🌙','🎂','🏕️','🪔','🌅','💃','🏏','☕','🎸','📚'];
+
+  let allMemories = [];
+  let current     = 'all';
+  let currentUser = null;
+
+  // ── Auth ──
+  const provider = new GoogleAuthProvider();
+  onAuthStateChanged(auth, user => {
+    currentUser = user;
+    const chip = document.getElementById('userChip');
+    if (user) {
+      chip.classList.add('visible');
+      document.getElementById('userNameS').textContent = user.displayName?.split(' ')[0] || 'You';
+      document.getElementById('userAvatarPh').textContent = (user.displayName || 'U')[0].toUpperCase();
+    } else {
+      chip.classList.remove('visible');
+    }
+    render();
+  });
+
+  document.getElementById('signOutBtn').addEventListener('click', () => signOut(auth));
+
+  function semLabel(s) { return s.replace('sem','Sem '); }
+
+  async function loadMemories() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = `<div class="empty">Loading memories... 📸</div>`;
+    try {
+      const q    = query(collection(db, 'memories'), orderBy('timestamp', 'desc'));
+      const snap = await getDocs(q);
+      allMemories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch(e) { console.error(e); }
+    render();
+  }
+
+  function render() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    const data = current === 'all' ? allMemories : allMemories.filter(m => m.sem === current);
+    document.getElementById('countLabel').textContent = data.length + ' memories';
+
+    if (!data.length) {
+      grid.innerHTML = `<div class="empty">No memories here yet — pin one! 📌</div>`;
+      return;
+    }
+
+    data.forEach((m, i) => {
+      const isMine = currentUser && m.uid === currentUser.uid;
+      const r      = rots[i % rots.length];
+      const color  = m.color || colors[i % colors.length];
+      const emoji  = emojis[i % emojis.length];
+
+      const card = document.createElement('div');
+      card.className = 'polaroid' + (isMine ? ' is-mine' : '');
+      card.style.setProperty('--r', r + 'deg');
+      card.style.setProperty('--delay', (i * 0.04).toFixed(2) + 's');
+
+      const imgContent = (!m.private && m.dataUrl)
+        ? `<img src="${m.dataUrl}" alt="${m.name}"/>`
+        : `<div class="photo-emoji">${m.private ? '🔒' : emoji}</div>`;
+
+      card.innerHTML = `
+        <div class="pin"></div>
+        <div class="photo ${(!m.private && m.dataUrl) ? '' : color}">
+          ${imgContent}
+          <span class="sem-badge">${semLabel(m.sem)}</span>
+          <div class="name-overlay">
+            <div class="overlay-name">${m.name}</div>
+            <div class="overlay-sem">${semLabel(m.sem)}</div>
+          </div>
+          <button class="card-delete" title="Delete">✕</button>
+        </div>
+        <div class="caption">${m.private ? '🔒 ' : ''}${m.caption}</div>
+      `;
+
+      card.querySelector('.card-delete').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (!confirm('Delete this memory forever? 🗑️')) return;
+        try {
+          await deleteDoc(doc(db, 'memories', m.id));
+          showToast('Memory removed 🗑️');
+          await loadMemories();
+        } catch(err) {
+          console.error(err);
+          showToast('Could not delete — try again 😕');
+        }
+      });
+
+      card.addEventListener('click', () => openLb(m, color, emoji));
+      grid.appendChild(card);
+    });
+  }
+
+  function filter(btn, sem) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    current = sem;
+    render();
+  }
+  window.filter = filter;
+
+  function openLb(m, color, emoji) {
+    const photo = document.getElementById('lbPhoto');
+    photo.className = `lb-photo ${(!m.private && m.dataUrl) ? '' : color}`;
+    if (m.private) {
+      photo.innerHTML = `<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.6rem;background:linear-gradient(135deg,#e8dece,#d4c5a9);">
+        <span style="font-size:3rem;">🔒</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:#5c3d1e;opacity:0.7;">Private Memory</span>
+      </div>`;
+    } else if (m.dataUrl) {
+      photo.innerHTML = `<img src="${m.dataUrl}" style="width:100%;height:100%;object-fit:cover;"/>`;
+    } else {
+      photo.innerHTML = `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3.5rem;opacity:0.3;">${emoji}</div>`;
+    }
+    document.getElementById('lbName').textContent    = m.name;
+    document.getElementById('lbCaption').textContent = '"' + m.caption + '"';
+    document.getElementById('lightbox').classList.add('open');
+  }
+
+  function closeLb() { document.getElementById('lightbox').classList.remove('open'); }
+  window.closeLb = closeLb;
+
+  function showToast(msg) {
+    // wall.html has no toast — just use alert for now
+    alert(msg);
+  }
+
+  window.addEventListener('scroll', () => {
+    document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 400);
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
+
+  loadMemories();
+</script>
+</body>
+</html>

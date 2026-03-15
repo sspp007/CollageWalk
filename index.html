@@ -645,15 +645,88 @@
     }
 
     @media (max-width: 600px) {
-      .hero { background-attachment: scroll; padding-bottom: 10%; }
+
+      /* ── HERO ── */
+      .hero {
+        background-attachment: scroll;
+        padding: 0 5% 12%;
+        justify-content: flex-end;
+      }
+
+      /* hide floating polaroids on mobile — they overlap text */
+      .hero-polaroids { display: none; }
+
+      .hero-title {
+        font-size: 2.4rem;
+        line-height: 1.1;
+      }
+
+      .hero-quote {
+        font-size: 1rem;
+        margin-bottom: 1.6rem;
+      }
+
+      /* stack the two CTA buttons vertically */
+      .hero-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+      }
+
+      .hero-cta {
+        font-size: 0.88rem;
+        padding: 0.75rem 1.4rem;
+        margin-bottom: 0.6rem;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .hero-tag {
+        font-size: 0.65rem;
+        margin-bottom: 0.9rem;
+      }
+
+      /* ── SEMESTER TABS ── */
+      .tabs {
+        gap: 0.35rem;
+        padding: 0 3%;
+        margin-bottom: 2rem;
+      }
+
+      .tab {
+        padding: 0.35rem 0.85rem;
+        font-size: 0.75rem;
+        border-radius: 100px;
+      }
+
+      /* ── WALL ── */
       .wall { columns: 2 140px; }
-      .tabs { gap: 0.4rem; }
+
+      /* ── SECTION INTRO ── */
+      .section-intro {
+        padding: 3rem 4% 2rem;
+      }
+
+      /* ── UPLOAD FORM ── */
+      .upload-section { padding: 3rem 5%; }
+
+      /* ── RULES ── */
+      .rules-section { padding: 3rem 5%; }
+      .rule-item { padding: 1rem 1.1rem; gap: 0.9rem; }
+      .rule-num { font-size: 1.4rem; }
+      .rule-text strong { font-size: 0.88rem; }
+
+      /* ── CREATOR ── */
       .creator-card {
         flex-direction: column;
         text-align: center;
         padding: 1.8rem 1.5rem;
         gap: 1.2rem;
       }
+
+      /* ── SCROLL HINT ── */
+      .scroll-hint { display: none; }
     }
   
     /* ── FLOATING HERO POLAROIDS ── */
@@ -1081,6 +1154,92 @@
     }
     .login-cancel:hover { color: var(--mid); }
 
+  
+    /* ── WALL RULES SECTION ── */
+    .rules-section {
+      background: var(--warm);
+      padding: 4rem 6%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .rules-section::before {
+      content: '📋';
+      position: absolute;
+      font-size: 10rem;
+      opacity: 0.04;
+      top: -1rem;
+      left: 4%;
+      pointer-events: none;
+    }
+
+    .rules-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      color: var(--dark);
+      margin-bottom: 0.4rem;
+    }
+
+    .rules-subtitle {
+      font-family: 'Caveat', cursive;
+      font-size: 1.15rem;
+      color: var(--light-text);
+      margin-bottom: 2.5rem;
+    }
+
+    .rules-list {
+      max-width: 580px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      text-align: left;
+    }
+
+    .rule-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.2rem;
+      background: white;
+      border-radius: 12px;
+      padding: 1.2rem 1.5rem;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .rule-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(30,15,0,0.14);
+    }
+
+    .rule-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--amber);
+      flex-shrink: 0;
+      line-height: 1;
+      margin-top: 0.1rem;
+    }
+
+    .rule-text strong {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--dark);
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    .rule-text p {
+      font-family: 'Caveat', cursive;
+      font-size: 1rem;
+      color: var(--light-text);
+      line-height: 1.5;
+      margin: 0;
+    }
+
   </style>
 </head>
 <body>
@@ -1167,8 +1326,8 @@
   <div class="section-intro">
     <div class="divider"></div>
     
-    <h2>Your Memory Wall</h2>
-    <p>One photo. One moment. Every semester — preserved forever.</p>
+    <h2 id="wallHeading">Your Memory Wall</h2>
+    <p id="wallSubtitle">One photo. One moment. Every semester — preserved forever.</p>
 
     <!-- Semester filter tabs -->
     <div class="tabs">
@@ -1231,17 +1390,50 @@
   </div>
 </section>
 
+<!-- WALL RULES SECTION -->
+<section class="rules-section">
+  <div class="divider" style="margin-bottom:1.5rem;"></div>
+  <h3 class="rules-title">Rules of the Wall 📋</h3>
+  <p class="rules-subtitle">"Thoda pyaar, thoda care — bas itna hi chahiye." ❤️</p>
+  <div class="rules-list">
+
+    <div class="rule-item">
+      <span class="rule-num">01</span>
+      <div class="rule-text">
+        <strong>Jo photo mummy ne dekh li toh ghar se nikaalna ho, woh yahan bhi mat daalna 😂🙏</strong>
+        <p>Yeh wall sab ke liye hai — isse safe aur respectful rakhna humari zimmedari hai.</p>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">02</span>
+      <div class="rule-text">
+        <strong>Akeli selfie se kaam nahi chalega — dost, yaar, koi bhi pakad le saath mein 📸❤️</strong>
+        <p>Ek achhi memory woh hoti hai jisme koi aur bhi ho — apne logon ko frame mein le aao.</p>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <span class="rule-num">03</span>
+      <div class="rule-text">
+        <strong>Kisi ki bhi photo bina permission ke mat daalna — friendship hai, court case nahi chahiye 💀⚖️</strong>
+        <p>Doston ki photo unse pooch ke daalo — surprise unhe tab dena jab result aaye, yahan nahi.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
 <!-- CREATOR SECTION -->
 <section class="creator-section">
   <div class="divider" style="margin-bottom:2rem;"></div>
   <p class="creator-label">✦ Created & Developed by</p>
   <div class="creator-card">
     <div class="creator-photo-wrap">
-      <img src="image_1.webp" alt="Shahid Parwez" class="creator-photo"/>
+      <img src="profile111.jpeg" alt="Shahid Parwez" class="creator-photo"/>
     </div>
     <div class="creator-info">
       <h3 class="creator-name">Shahid Parwez</h3>
-      <p class="creator-college">ABES Institute of Technology</p>
       <p class="creator-tagline">"Built this so no memory gets left behind."</p>
     </div>
   </div>
@@ -1330,17 +1522,37 @@
     } else {
       chip.classList.remove('visible');
     }
-    renderWall();
+    loadMemories();
   });
 
+  // ── Dummy samples shown when not logged in ──
+  const dummyMemories = [
+    { id:'d1', name:"Rohan & Gang",  sem:"sem1", caption:"First day, zero clue, 100% vibes 🎒", color:"p1", r:-2,   dummy:true },
+    { id:'d2', name:"Priya S.",      sem:"sem2", caption:"Lab nights hit different 💡",           color:"p3", r:1.5,  dummy:true },
+    { id:'d3', name:"Meera T.",      sem:"sem4", caption:"Diwali on campus 🪔✨",                 color:"p6", r:-1,   dummy:true },
+    { id:'d4', name:"Dev & friends", sem:"sem5", caption:"Hostel terrace, every evening 🌅",      color:"p9", r:2,    dummy:true },
+  ];
+
   // ─────────────────────────────────────────
-  // LOAD
+  // LOAD — only current user's memories
   // ─────────────────────────────────────────
   async function loadMemories() {
     const wall = document.getElementById('memoryWall');
-    wall.innerHTML = `<p style="text-align:center;color:var(--light-text);padding:3rem;font-family:'Caveat',cursive;font-size:1.3rem;">Loading memories... 📸</p>`;
+
+    // not logged in — show dummy samples
+    if (!currentUser) {
+      allMemories = [];
+      renderWall();
+      return;
+    }
+
+    wall.innerHTML = `<p style="text-align:center;color:var(--light-text);padding:3rem;font-family:'Caveat',cursive;font-size:1.3rem;">Loading your memories... 📸</p>`;
     try {
-      const q    = query(collection(db, 'memories'), orderBy('timestamp', 'desc'));
+      const q    = query(
+        collection(db, 'memories'),
+        where('uid', '==', currentUser.uid),
+        orderBy('timestamp', 'desc')
+      );
       const snap = await getDocs(q);
       allMemories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     } catch(e) { console.error(e); }
@@ -1348,17 +1560,60 @@
   }
 
   // ─────────────────────────────────────────
-  // RENDER — delete button only for owner
+  // RENDER — show dummy if logged out, own pins if logged in
   // ─────────────────────────────────────────
   function renderWall() {
-    const wall = document.getElementById('memoryWall');
+    const wall     = document.getElementById('memoryWall');
+    const heading  = document.getElementById('wallHeading');
+    const subtitle = document.getElementById('wallSubtitle');
     wall.innerHTML = '';
+
+    // ── NOT LOGGED IN — show dummy samples + sign in banner ──
+    if (!currentUser) {
+      if (heading)  heading.textContent  = 'Your Memory Wall';
+      if (subtitle) subtitle.textContent = 'Sign in to see your memories pinned here.';
+
+      // sign in banner
+      const banner = document.createElement('div');
+      banner.style.cssText = 'text-align:center;padding:1.5rem 2rem;margin-bottom:1.5rem;background:rgba(232,160,48,0.1);border:1.5px dashed var(--amber);border-radius:10px;font-family:"Caveat",cursive;font-size:1.15rem;color:var(--mid);';
+      banner.innerHTML = '🔒 These are sample memories — <strong>pin yours</strong> to see them here after signing in.';
+      wall.appendChild(banner);
+
+      // render dummy cards
+      dummyMemories.forEach((mem, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.setProperty('--r', mem.r + 'deg');
+        card.style.setProperty('--delay', (i * 0.1) + 's');
+        card.style.opacity = '0.75';
+        card.style.filter  = 'grayscale(20%)';
+        card.style.pointerEvents = 'none';
+
+        const semLabel = mem.sem.replace('sem', 'Sem ');
+        card.innerHTML = `
+          <div class="card-img ${mem.color}">
+            <div class="card-img-label">📸</div>
+            <span class="card-sem">${semLabel}</span>
+          </div>
+          <div class="card-caption">${mem.caption}</div>
+          <div class="card-name">— ${mem.name}</div>
+        `;
+        wall.appendChild(card);
+      });
+      return;
+    }
+
+    // ── LOGGED IN ──
+    const firstName = currentUser.displayName?.split(' ')[0] || 'You';
+    if (heading)  heading.textContent  = firstName + "'s Memory Wall";
+    if (subtitle) subtitle.textContent = 'Your moments, your story — pinned forever.';
+
     const filtered = currentFilter === 'all'
       ? allMemories
       : allMemories.filter(m => m.sem === currentFilter);
 
     if (!filtered.length) {
-      wall.innerHTML = `<p style="text-align:center;color:var(--light-text);padding:3rem;font-family:'Caveat',cursive;font-size:1.3rem;">No memories pinned here yet... be the first! 📌</p>`;
+      wall.innerHTML = `<p style="text-align:center;color:var(--light-text);padding:3rem;font-family:'Caveat',cursive;font-size:1.3rem;">Your wall is empty — pin your first memory! 📌</p>`;
       return;
     }
 

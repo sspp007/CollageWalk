@@ -1240,6 +1240,88 @@
       margin: 0;
     }
 
+  
+    /* ── UNLOCK LINK BUTTON on private cards ── */
+    .card-unlock {
+      display: block;
+      width: calc(100% - 1.8rem);
+      margin: 0.4rem 0.9rem 0;
+      background: none;
+      border: 1px dashed rgba(232,160,48,0.5);
+      border-radius: 4px;
+      padding: 0.28rem 0.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.65rem;
+      color: var(--amber);
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.03em;
+      text-align: center;
+    }
+    .card-unlock:hover {
+      background: rgba(232,160,48,0.1);
+      border-color: var(--amber);
+    }
+
+  
+    /* ── UNLOCK EXPLAIN SECTION ── */
+    .unlock-explain-section {
+      background: var(--cream);
+      padding: 0 6% 4rem;
+      text-align: center;
+    }
+
+    .unlock-explain-card {
+      max-width: 560px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 14px;
+      padding: 2rem 2.2rem;
+      box-shadow: var(--card-shadow);
+      text-align: left;
+      display: flex;
+      gap: 1.4rem;
+      align-items: flex-start;
+      border-left: 4px solid var(--amber);
+      transition: transform 0.25s ease;
+    }
+
+    .unlock-explain-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .unlock-explain-icon {
+      font-size: 2.4rem;
+      flex-shrink: 0;
+      margin-top: 0.2rem;
+    }
+
+    .unlock-explain-text h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      color: var(--dark);
+      margin-bottom: 0.6rem;
+    }
+
+    .unlock-explain-text p {
+      font-family: 'Caveat', cursive;
+      font-size: 1.05rem;
+      color: var(--mid);
+      line-height: 1.7;
+    }
+
+    .unlock-explain-text strong {
+      color: var(--rust);
+    }
+
+    @media (max-width: 600px) {
+      .unlock-explain-card {
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 1.5rem;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1421,6 +1503,23 @@
       </div>
     </div>
 
+  </div>
+</section>
+
+<!-- UNLOCK FEATURE SECTION -->
+<section class="unlock-explain-section">
+  <div class="unlock-explain-card">
+    <div class="unlock-explain-icon">🔑</div>
+    <div class="unlock-explain-text">
+      <h3>Private Memory? Share it your way.</h3>
+      <p>
+        Public wall sab ke liye hai. Par kuch photos? <strong>Woh sirf teri hain.</strong> 🔒
+        <br/><br/>
+        Private pin karo — aur jab chaaho, jise chaaho, link bhejo.
+        <br/>
+        Baaki ko bas tala dikhega. 😂🔑
+      </p>
+    </div>
   </div>
 </section>
 
@@ -1636,6 +1735,11 @@
         ? `<button class="card-delete" title="Delete my memory">✕</button>`
         : '';
 
+      // unlock button only for owner's private cards
+      const unlockBtn = (mem.private && isMine)
+        ? `<button class="card-unlock" data-id="${mem.id}">🔑 Copy unlock link</button>`
+        : '';
+
       card.innerHTML = `
         <div class="card-img ${mem.color || 'p1'}">
           ${imgContent}
@@ -1649,6 +1753,7 @@
         </div>
         <div class="card-caption">${mem.caption}</div>
         <div class="card-name">— ${mem.name}</div>
+        ${unlockBtn}
       `;
 
       if (isMine) {
@@ -1663,6 +1768,20 @@
             console.error(err);
             showToast('Could not delete — try again 😕');
           }
+        });
+      }
+
+      // unlock link handler — only for owner's private cards
+      if (mem.private && isMine) {
+        card.querySelector('.card-unlock').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const base = 'https://collagewalk.netlify.app/wall.html';
+          const link = base + '?unlock=' + mem.id;
+          navigator.clipboard.writeText(link).then(() => {
+            const btn = e.currentTarget;
+            btn.textContent = '✅ Link copied!';
+            setTimeout(() => { btn.textContent = '🔑 Copy unlock link'; }, 2500);
+          });
         });
       }
 

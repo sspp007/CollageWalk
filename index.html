@@ -1322,6 +1322,28 @@
       }
     }
 
+  
+    /* ── NAV SIGN IN BUTTON — shown when logged out ── */
+    .nav-signin-btn {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      background: white;
+      border: none;
+      border-radius: 100px;
+      padding: 0.4rem 1rem 0.4rem 0.6rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--dark);
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      z-index: 20;
+    }
+    .nav-signin-btn.visible { display: flex; }
+    .nav-signin-btn:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.2); transform: translateY(-1px); }
+
   </style>
 </head>
 <body>
@@ -1380,6 +1402,10 @@
       <span class="user-name-short" id="userNameShort"></span>
       <button class="signout-btn" id="signOutBtn">Sign out</button>
     </div>
+    <button class="nav-signin-btn" id="navSignInBtn">
+      <svg viewBox="0 0 48 48" width="16" height="16"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Sign in
+    </button>
   </nav>
 
   <div class="hero-content">
@@ -1514,9 +1540,7 @@
       <h3>Private Memory? Share it your way.</h3>
       <p>
         Public wall sab ke liye hai. Par kuch photos? <strong>Woh sirf teri hain.</strong> 🔒
-        <br/><br/>
         Private pin karo — aur jab chaaho, jise chaaho, link bhejo.
-        <br/>
         Baaki ko bas tala dikhega. 😂🔑
       </p>
     </div>
@@ -1591,6 +1615,12 @@
   // ─────────────────────────────────────────
   const provider = new GoogleAuthProvider();
 
+  // nav sign in button — visible when logged out
+  document.getElementById('navSignInBtn').addEventListener('click', () => {
+    pendingPrivate = null;
+    document.getElementById('loginOverlay').classList.remove('hidden');
+  });
+
   document.getElementById('googleSignInBtn').addEventListener('click', async () => {
     try {
       await signInWithPopup(auth, provider);
@@ -1607,10 +1637,12 @@
   onAuthStateChanged(auth, user => {
     currentUser = user;
     const chip = document.getElementById('userChip');
+    const navSignInBtn = document.getElementById('navSignInBtn');
     if (user) {
       // hide login overlay if open
       document.getElementById('loginOverlay').classList.add('hidden');
       chip.classList.add('visible');
+      if (navSignInBtn) navSignInBtn.classList.remove('visible');
       document.getElementById('userNameShort').textContent =
         user.displayName?.split(' ')[0] || 'You';
       document.getElementById('userAvatarPlaceholder').textContent =
@@ -1620,16 +1652,22 @@
       if (!ni.value) ni.value = user.displayName || '';
     } else {
       chip.classList.remove('visible');
+      if (navSignInBtn) navSignInBtn.classList.add('visible');
     }
     loadMemories();
   });
 
   // ── Dummy samples shown when not logged in ──
+  // dummy cards use inline background styles for warm illustrated feels
   const dummyMemories = [
-    { id:'d1', name:"Rohan & Gang",  sem:"sem1", caption:"First day, zero clue, 100% vibes 🎒", color:"p1", r:-2,   dummy:true },
-    { id:'d2', name:"Priya S.",      sem:"sem2", caption:"Lab nights hit different 💡",           color:"p3", r:1.5,  dummy:true },
-    { id:'d3', name:"Meera T.",      sem:"sem4", caption:"Diwali on campus 🪔✨",                 color:"p6", r:-1,   dummy:true },
-    { id:'d4', name:"Dev & friends", sem:"sem5", caption:"Hostel terrace, every evening 🌅",      color:"p9", r:2,    dummy:true },
+    { id:'d1', name:"Rohan & Gang",  sem:"sem1", caption:"First day, zero clue, 100% vibes 🎒",
+      bg:"linear-gradient(160deg,#f9c86a 0%,#f47c3c 50%,#c94020 100%)", emoji:"🎒", r:-2 },
+    { id:'d2', name:"Priya S.",      sem:"sem2", caption:"Lab nights hit different 💡",
+      bg:"linear-gradient(160deg,#1a1a2e 0%,#16213e 40%,#0f3460 70%,#533483 100%)", emoji:"💡", r:1.5 },
+    { id:'d3', name:"Meera T.",      sem:"sem4", caption:"Diwali on campus 🪔✨",
+      bg:"linear-gradient(160deg,#0d0221 0%,#1a0a2e 30%,#6b2fa0 70%,#f5a623 100%)", emoji:"🪔", r:-1 },
+    { id:'d4', name:"Dev & friends", sem:"sem5", caption:"Hostel terrace, every evening 🌅",
+      bg:"linear-gradient(160deg,#ff6b35 0%,#f7c59f 30%,#efefd0 60%,#004e89 100%)", emoji:"🌅", r:2 },
   ];
 
   // ─────────────────────────────────────────
@@ -1690,8 +1728,8 @@
 
         const semLabel = mem.sem.replace('sem', 'Sem ');
         card.innerHTML = `
-          <div class="card-img ${mem.color}">
-            <div class="card-img-label">📸</div>
+          <div class="card-img" style="background:${mem.bg};position:relative;">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.8rem;opacity:0.7;">${mem.emoji}</div>
             <span class="card-sem">${semLabel}</span>
           </div>
           <div class="card-caption">${mem.caption}</div>

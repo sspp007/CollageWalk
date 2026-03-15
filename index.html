@@ -1237,11 +1237,11 @@
   <p class="creator-label">✦ Created & Developed by</p>
   <div class="creator-card">
     <div class="creator-photo-wrap">
-      <img src="profile111.jpeg" alt="Shahid Parwez" class="creator-photo"/>
+      <img src="image_1.webp" alt="Shahid Parwez" class="creator-photo"/>
     </div>
     <div class="creator-info">
       <h3 class="creator-name">Shahid Parwez</h3>
-      <p class="creator-college">ABES Institute of Tech </p>
+      <p class="creator-college">ABES Institute of Technology</p>
       <p class="creator-tagline">"Built this so no memory gets left behind."</p>
     </div>
   </div>
@@ -1269,7 +1269,7 @@
 <script type="module">
   import { initializeApp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query }
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, where, query }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -1506,6 +1506,19 @@
 
     if (!name || !sem || !caption) {
       showToast('Please fill in name, semester and caption ✍️');
+      return;
+    }
+
+    // ── 5 posts per day limit ──
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const todayQ    = query(
+      collection(db, 'memories'),
+      where('uid', '==', currentUser.uid),
+      where('timestamp', '>', oneDayAgo)
+    );
+    const todaySnap = await getDocs(todayQ);
+    if (todaySnap.size >= 5) {
+      showToast('You have pinned 5 memories today 🙏 Come back tomorrow!');
       return;
     }
 
